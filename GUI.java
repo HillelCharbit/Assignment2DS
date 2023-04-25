@@ -20,7 +20,7 @@ public class GUI extends JFrame{
 	private static final long serialVersionUID = 1L;
 	
 	final int TABLESIZE = 4;
-    public DT dt;
+    public DataStructure dt;
 	String fileName="d:\\db1.txt";
 	boolean withOutLoading=false;
 	
@@ -229,7 +229,7 @@ public class GUI extends JFrame{
                 pointCompare2 c2=new pointCompare2();
                 Arrays.sort(points, c1);
                 Arrays.sort(points,c2);*/
-                dt=new DataStructure();
+                dt= new DataStructure();
                 for (int i = 0; i < points.length; i++) 
                 {
 					dt.addPoint(points[i]);
