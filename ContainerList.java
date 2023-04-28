@@ -1,158 +1,188 @@
 import java.util.Iterator;
 
-//public class ContainerList implements Iterable<Container> {
+/**
+ * A class that functions like a doubly linked list of Containers.
+ * The points in the list are always sorted in an increasing order.
+ */
 public class ContainerList {
     protected Container head;
     protected Container tail;
+
+    private Container median;
     private int size;
-    private boolean axis;
+    private final boolean axis;   // true means X axis while false means Y axis
 
     public ContainerList(boolean axis) {
         this.head = null;
         this.tail = null;
+        this.axis = axis;
         this.size = 0;
-        this.axis = axis;   // true means x
     }
 
+    /**
+     * Add a point to the list.
+     * TODO: do not add an illegal point (but that mean's visiting all the points in the list.
+     * TODO: after completing the first TODO, add an option to use the function as it was.
+     *
+     * @param point a point to add to the list.
+     * @return a new Container containing the point.
+     */
     public Container add(Point point) {
-        Container newNode = new Container(point);
+        Container newNode = new Container(point), current = this.head, beforeCurrent;
+        boolean isSmaller;
+        int val, medVal;    // value of new node and the current median
 
+        // if the list is empty
         if (size == 0) {
-            // add the first (and last) point
+            // this point will be the head and the tail
             this.head = newNode;
             this.tail = newNode;
         } else {
-            Container current = head;
-            boolean inRange = true;
+            // compare each point's value to the value of the new point (by the provided axis)
+            while (current != null) {
+                // check if the current value is less than the given value
+                isSmaller = axis ? current.getX() < point.getX() : current.getY() < point.getY();
 
-            int x = point.getX();
-            int y = point.getY();
-
-            while (current != null && inRange) {
-                if (this.axis)
-                    inRange = current.getData().getX() < x;
-                else
-                    inRange = current.getData().getY() < y;
-
-                if (inRange)
+                if (isSmaller)
                     current = current.getNext();
+                else
+                    break;
             }
 
+            // if the loop ended with current being null, then isSmall is true -
+            // the tail is smaller than the given value
             if (current == null) {
-                if (inRange) {
-                    // add at the end
-                    this.tail.setNext(newNode);
-                    newNode.setPrev(this.tail);
-                    this.tail = newNode;
-                } else {
-                    // one before tail
-                    Container beforeTail = this.tail.getPrev();
-                    newNode.setNext(this.tail);
-                    this.tail.setPrev(newNode);
-                    newNode.setPrev(beforeTail);
-
-                    if (beforeTail == null)
-                        this.head = newNode;
-                    else
-                        beforeTail.setNext(newNode);
-                }
-            } else {
-                // before current
+                // add the point in the end (make it the tail)
+                this.tail.setNext(newNode);
+                newNode.setPrev(this.tail);
+                this.tail = newNode;
+            }
+            // insert the point before the last point that we checked
+            else {
+                beforeCurrent = current.getPrev();
                 newNode.setNext(current);
-                newNode.setPrev(current.getPrev());
+                newNode.setPrev(beforeCurrent);
 
-                if (current.getPrev() == null)
-                    head = newNode;
+                if (beforeCurrent == null)
+                    this.head = newNode;
                 else
-                    current.getPrev().setNext(newNode);
+                    beforeCurrent.setNext(newNode);
 
                 current.setPrev(newNode);
             }
         }
+
+        // update the median
+
+        if (this.size == 0)
+            this.median = newNode;
+        else {
+            val = axis ? point.getX() : point.getY();
+            medVal = axis ? this.median.getX() : this.median.getY();
+
+            if (this.size % 2 == 0 && val < medVal)
+                // the middle point is now a valid index, the index of the current median.
+                // but the current median is pushed forward. e.g. 1 2 3 4, m = 3, a = 0 -> 0 1 2 3 4, m = 2.
+                this.median = this.median.getPrev();
+            else if (this.size % 2 == 1 && val > medVal)
+                // the middle point is now not a valid index, the ceiling is the index of the current median + 1.
+                // e.g. 1 2 3 4 5, m = 3, a = 6 -> 1 2 3 4 5 6, m = 4.
+                this.median = this.median.getNext();
+        }
+
         this.size += 1;
+
         return newNode;
     }
 
-    public boolean isEmpty(){ return this.size == 0; }
+    public boolean isEmpty() {
+        return this.size == 0;
+    }
 
-    public String toString(){
+    public String toString() {
         String str = "{";
         Container current = head;
 
-        if (current != null)
+        if (current != null) {
             str += current.toString();
 
-        while (current.getNext() != null){
-            str += ", " + current.getNext().toString();
-            current = current.getNext();
+            while (current.getNext() != null) {
+                str += ", " + current.getNext().toString();
+                current = current.getNext();
+            }
         }
 
         return str + "}";
     }
 
-    public int getSize(){
+    public int getSize() {
         return this.size;
     }
 
-    public int getMax(){
+    /** @return the max. value of a point in the list (by the given axis). */
+    public int getMax() {
         if (this.axis)
-            return this.tail.getData().getX();
-        return this.tail.getData().getY();
+            return this.tail.getX();
+        return this.tail.getY();
     }
 
-    public int getMin(){
+    /** @return the min. value of a point in the list (by the given axis). */
+    public int getMin() {
         if (this.axis)
-            return this.head.getData().getX();
-        return this.head.getData().getY();
+            return this.head.getX();
+        return this.head.getY();
     }
 
-    public int removeOutOfRange(int min, int max, ContainerList other){
-        int removes = 0;
+    /**
+     * Remove a point from the list.
+     * @param toRemove the container to remove (A REFERENCE!)
+     */
+    public void remove(Container toRemove) {
+        if (this.isEmpty())
+            throw new IllegalArgumentException();
 
-        while (head != null){
-            if ((axis ? head.getData().getX() : head.getData().getY()) < min) {
-                this.size--;
-                other.remove(head.getInOtherList());
-                head = head.getNext();
-                head.setPrev(null);
+        int val, medVal;    // value of new node and the current median
+
+        if (this.size == 1) {
+            if (toRemove == this.head) {
+                // reset
+                this.head = null;
+                this.tail = null;
+                this.median = null;
+                this.size = 0;
             }
-            else
-                break;
+            else throw new IllegalArgumentException();
         }
+        else if (toRemove != null) {    // and also the size is at least 2
+            val = axis ? toRemove.getX() : toRemove.getY();
+            medVal = axis ? this.median.getX() : this.median.getY();
 
-        while (tail != null){
-            if ((axis ? tail.getData().getX() : tail.getData().getY()) > max) {
-                this.size--;
-                other.remove(tail.getInOtherList());
-                tail = tail.getPrev();
-                tail.setNext(null);
-                removes++;
-            }
-            else
-                break;
+            if (this.size % 2 == 0 && (toRemove == this.median || val > medVal))
+                // for example 1 2 3 4, m = 3, removing 3 -> 1 2 4, m = 2
+                // or 1 2 3 4, m = 3, removing 4 -> 1 2 3, m = 2
+                this.median = this.median.getPrev();
+            else if (this.size % 2 == 1 && (toRemove == this.median || val < medVal))
+                // for example 1 2 3 4 5, m = 3, removing 3 -> 1 2 4 5, m = 4
+                // or 1 2 3 4 5, m = 3, removing 2 -> 1 3 4 5, m = 4
+                this.median = this.median.getNext();
+
+            if (toRemove == head)
+                head = toRemove.getNext();
+
+            if (toRemove == tail)
+                tail = toRemove.getPrev();
+
+            if (toRemove.getNext() != null)
+                toRemove.getNext().setPrev(toRemove.getPrev());
+
+            if (toRemove.getPrev() != null)
+                toRemove.getPrev().setNext(toRemove.getNext());
+
+            this.size--;
         }
-
-        return removes;
     }
 
-    public void remove(Container toRemove){
-        if(size == 1) {
-            head = null;
-            tail = null;
-        }
-
-        if (toRemove == head)
-            head = toRemove.getNext();
-
-        if (toRemove == tail)
-            tail = toRemove.getPrev();
-
-        if (toRemove.getNext() != null)
-            toRemove.getNext().setPrev(toRemove.getPrev());
-
-        if (toRemove.getPrev() != null)
-            toRemove.getPrev().setNext(toRemove.getNext());
-
-        size--;
+    public Container getMedian(){
+        return this.median;
     }
 }
