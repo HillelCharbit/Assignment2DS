@@ -1,4 +1,3 @@
-
 public class DataStructure implements DT {
 	private  ContainerList xSorted; // a list of the points, sorted by the X values
 	private  ContainerList ySorted; // a list of the points, sorted by the Y values
@@ -192,4 +191,3 @@ public class DataStructure implements DT {
         return this.size;
     }
 }
-

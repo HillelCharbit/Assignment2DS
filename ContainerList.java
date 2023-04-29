@@ -48,7 +48,6 @@ public class ContainerList {
                 else
                     break;
             }
-
             // if the loop ended with current being null, then isSmall is true -
             // the tail is smaller than the given value
             if (current == null) {
@@ -73,7 +72,6 @@ public class ContainerList {
         }
 
         // update the median
-
         if (this.size == 0)
             this.median = newNode;
         else {
@@ -82,16 +80,15 @@ public class ContainerList {
 
             if (this.size % 2 == 0 && val < medVal)
                 // the middle point is now a valid index, the index of the current median.
-                // but the current median is pushed forward. e.g. 1 2 3 4, m = 3, a = 0 -> 0 1 2 3 4, m = 2.
+                // but the current median is pushed forward. e.g. 1 2 3 4, median = 3, a = 0 -> 0 1 2 3 4, median = 2.
                 this.median = this.median.getPrev();
             else if (this.size % 2 == 1 && val > medVal)
                 // the middle point is now not a valid index, the ceiling is the index of the current median + 1.
-                // e.g. 1 2 3 4 5, m = 3, a = 6 -> 1 2 3 4 5 6, m = 4.
+                // e.g. 1 2 3 4 5, median = 3, a = 6 -> 1 2 3 4 5 6, median = 4.
                 this.median = this.median.getNext();
         }
 
         this.size += 1;
-
         return newNode;
     }
 
@@ -144,26 +141,23 @@ public class ContainerList {
         int val, medVal;    // value of new node and the current median
 
         if (this.size == 1) {
-            if (toRemove == this.head) {
-                // reset
-                this.head = null;
-                this.tail = null;
-                this.median = null;
-                this.size = 0;
-            }
-            else throw new IllegalArgumentException();
+            // reset
+            this.head = null;
+            this.tail = null;
+            this.median = null;
+            this.size = 0;
         }
         else if (toRemove != null) {    // and also the size is at least 2
             val = axis ? toRemove.getX() : toRemove.getY();
             medVal = axis ? this.median.getX() : this.median.getY();
 
-            if (this.size % 2 == 0 && (toRemove == this.median || val > medVal))
-                // for example 1 2 3 4, m = 3, removing 3 -> 1 2 4, m = 2
+            if (this.size % 2 == 0 && (val >= medVal))
+                // for example 1 2 3 4, median = 3, removing 3 -> 1 2 4, median = 2
                 // or 1 2 3 4, m = 3, removing 4 -> 1 2 3, m = 2
                 this.median = this.median.getPrev();
-            else if (this.size % 2 == 1 && (toRemove == this.median || val < medVal))
-                // for example 1 2 3 4 5, m = 3, removing 3 -> 1 2 4 5, m = 4
-                // or 1 2 3 4 5, m = 3, removing 2 -> 1 3 4 5, m = 4
+            else if (this.size % 2 == 1 && (val <= medVal))
+                // for example 1 2 3 4 5, median = 3, removing 3 -> 1 2 4 5, median = 4
+                // or 1 2 3 4 5, median = 3, removing 2 -> 1 3 4 5, median = 4
                 this.median = this.median.getNext();
 
             if (toRemove == head)

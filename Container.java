@@ -56,4 +56,3 @@ public class Container{
 	public int getX(){ return this.data.getX(); }
 	public int getY(){ return this.data.getY(); }
 }
-
