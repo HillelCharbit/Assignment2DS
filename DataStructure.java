@@ -219,10 +219,37 @@ public class DataStructure implements DT {
 	@Override
 	public Point[] nearestPairInStrip(Container container, double width,
 									  Boolean axis) {
-		int min = axis ? (int)((double)container.getX() - width) :  (int)((double)container.getY() - width);
-		int max = axis ? (int)((double)container.getX() + width) :  (int)((double)container.getY() + width);
+		Point[] PointsInStrip = pointsInStrip(container,width,axis);
+		Point[] Pair = new Point[2];
 
-		return nearestPointInStripHelper(container, min, max, axis);
+		return Pair;
+	}
+	public Point[] pointsInStrip(Container container, double width, Boolean axis) {
+		Point[] pointsInStrip = new Point[size]; // wasteful, should be organized as a containerlist. rearranged with mergesort
+		int midpoint = (int) (size / 2);
+		Container current = container;
+		int containerVal, currentVal;
+		containerVal = current.getVal(axis);
+
+		currentVal = containerVal;
+		while ((double)currentVal >= (double)containerVal - width / 2) {
+			pointsInStrip[midpoint--] = current.getData();
+			current = current.getPrev();
+			if(current == null)
+				break;
+			currentVal=current.getVal(axis);
+		}
+		current = container;
+		currentVal = containerVal;
+		midpoint = (int) (size / 2);
+		while ((double)currentVal <= (double)containerVal + width / 2) {
+			pointsInStrip[midpoint++] = current.getData();
+			current = current.getNext();
+			if(current == null)
+				break;
+			currentVal=current.getVal(axis);
+		}
+		return pointsInStrip;
 	}
 
 	public Point[] nearestPointInStripHelper(Container point, int min, int max, Boolean axis){

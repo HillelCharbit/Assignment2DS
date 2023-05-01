@@ -8,17 +8,19 @@ public class Test {
         addPoints(dt, getTestPoints());
         System.out.println(dt.getxSorted());
         System.out.println(dt.getySorted());
-        Point[] output = dt.getPointsInRangeRegAxis(1,8,true);
-        for(Point e: output)
-            System.out.println(e);
+        Container median = dt.getMedian(true);
+        System.out.println(median);
+        Point[] points = dt.pointsInStrip(median,4,true);
+        for(Point p: points)
+            System.out.println(p);
 
     }
 
     public static Point[] getTestPoints(){
         Point[] arr = {
-                new Point(-8, 14), new Point(11, -1), new Point(3, 7),
-                new Point(5, 4), new Point(0, 2), new Point(1, 6),
-                new Point(14, 5), new Point(7, 20), new Point(10, 3)
+                new Point(-4, 7), new Point(5, -1), new Point(3, 6),
+                new Point(6, 4), new Point(0, 2), new Point(1, 5),
+                new Point(4, 3), new Point(-2, -4), new Point(2, 1)
         };
 
         return arr;
