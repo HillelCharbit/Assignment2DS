@@ -23,7 +23,6 @@ public class ContainerList {
      * Add a point to the list.
      * TODO: do not add an illegal point (but that mean's visiting all the points in the list.
      * TODO: after completing the first TODO, add an option to use the function as it was.
-     *
      * @param point a point to add to the list.
      * @return a new Container containing the point.
      */
@@ -178,5 +177,41 @@ public class ContainerList {
 
     public Container getMedian(){
         return this.median;
+    }
+
+    public void addLast(Point point){
+        this.addLast(new Container(point));
+    }
+
+    public void addLast(Container point){
+        if (this.tail == null){
+            this.tail = point;
+            this.head = point;
+            this.median = point;
+        }
+        else{
+            this.tail.setNext(point);
+            point.setPrev(this.tail);
+            this.tail = point;
+        }
+        this.size++;
+    }
+
+    public void addFirst(Point point){
+        this.addFirst(new Container(point));
+    }
+
+    public void addFirst(Container point){
+        if (this.head == null){
+            this.head = point;
+            this.tail = point;
+            this.median = point;
+        }
+        else{
+            this.head.setPrev(point);
+            point.setNext(this.head);
+            this.head = point;
+        }
+        this.size++;
     }
 }

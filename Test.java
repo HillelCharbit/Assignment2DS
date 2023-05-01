@@ -7,13 +7,11 @@ public class Test {
         DataStructure dt = new DataStructure();
         addPoints(dt, getTestPoints());
         System.out.println(dt.getxSorted());
-        System.out.println(dt.getMedian(true));
-        dt.getxSorted().remove(dt.getxSorted().getMedian());
-        System.out.println(dt.getxSorted());
-        System.out.println(dt.getMedian(true));
-        dt.getxSorted().remove(dt.getxSorted().getMedian());
-        System.out.println(dt.getxSorted());
-        System.out.println(dt.getMedian(true));
+        System.out.println(dt.getySorted());
+        Point[] output = dt.getPointsInRangeRegAxis(1,8,true);
+        for(Point e: output)
+            System.out.println(e);
+
     }
 
     public static Point[] getTestPoints(){
