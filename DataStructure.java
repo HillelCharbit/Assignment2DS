@@ -10,10 +10,6 @@ public class DataStructure implements DT {
 		this.size = 0;
 	}
 
-	public  DataStructure(DataStructure dt){
-
-	}
-
 	/**
 	 * Add a point to the data structure.
 	 * @param point a point to add.
@@ -58,19 +54,7 @@ public class DataStructure implements DT {
 
 			current = current.getNext();
 		}
-		output = deleteArrayTail(tmp,i);
-		return output;
-	}
-	private Point[] deleteArrayTail(Point[] toDeleteFrom, int i){
-		Point[] output = new Point[i];
-		if (i != this.size) {
-			// create an array of the correct size and copy the points to it
-			while (i != 0) {
-				output[i - 1] = toDeleteFrom[i - 1];
-				i--;
-			}
-		}
-		else output = toDeleteFrom;
+		output = deleteArrayTail(tmp, 0, i);
 		return output;
 	}
 
@@ -99,10 +83,14 @@ public class DataStructure implements DT {
 
 			current = current.getNext();
 		}
-		output = deleteArrayTail(tmp,i);
+		output = deleteArrayTail(tmp, 0, i);
 		return output;
 	}
 
+	/**
+	 * Calculate the density of the DT, meaning the ratio between the number of points and the area covered by them.
+	 * @return the density of points in the structure.
+	 */
 	@Override
 	public double getDensity() {
 		return (double)(this.size) / ((this.xSorted.getMax() - this.xSorted.getMin()) *
@@ -151,25 +139,6 @@ public class DataStructure implements DT {
 		return xSorted.getMax() - xSorted.getMin() > ySorted.getMax() - ySorted.getMin();
 	}
 
-//    /**
-//     *  Get the median point in the structure according to the chosen axis.
-//     * @param axis true for X, false for Y.
-//     * @return the median point by the axis.
-//     */
-//    @Override
-//    public Container getMedian(Boolean axis) {
-//        if (size == 0)
-//            return null;
-//
-//        Container current = axis ? xSorted.head : ySorted.head;
-//
-//        // using the fact that the list is always sorted, we know where the median value is.
-//        for (int i = 0; i < size / 2; i++)
-//            current = current.getNext();
-//
-//        return current;
-//    }
-
 	/**
 	 * Get the median point in the structure according to the chosen axis.
 	 * @param axis true for X, false for Y.
@@ -182,40 +151,6 @@ public class DataStructure implements DT {
 		return axis ? xSorted.getMedian() : ySorted.getMedian();
 	}
 
-//	public ContainerList getStrip(Container point, double width, boolean axis){
-//		int min = axis ? (int)((double)point.getX() - width) :  (int)((double)point.getY() - width);
-//		int max = axis ? (int)((double)point.getX() + width) :  (int)((double)point.getY() + width);
-//		ContainerList strip = new ContainerList(axis);
-//		Container original = new Container(point);
-//		int val = axis ? point.getX() : point.getY();
-//
-//		while (val <= max){
-//			strip.addLast(point);
-//			point = point.getNext();
-//
-//			if (point != null)
-//				val = axis ? point.getX() : point.getY();
-//			else break;
-//		}
-//
-//		point = original.getPrev();
-//
-//		if (point != null) {
-//			val = axis ? point.getX() : point.getY();
-//
-//			while (min <= val) {
-//				strip.addFirst(point);
-//				point = point.getPrev();
-//
-//				if (point != null)
-//					val = axis ? point.getX() : point.getY();
-//				else break;
-//			}
-//		}
-//
-//		return strip;
-//	}
-
 	@Override
 	public Point[] nearestPairInStrip(Container container, double width,
 									  Boolean axis) {
@@ -224,32 +159,27 @@ public class DataStructure implements DT {
 
 		return Pair;
 	}
-	public Point[] pointsInStrip(Container container, double width, Boolean axis) {
-		Point[] pointsInStrip = new Point[size]; // wasteful, should be organized as a containerlist. rearranged with mergesort
-		int midpoint = (int) (size / 2);
-		Container current = container;
-		int containerVal, currentVal;
-		containerVal = current.getVal(axis);
 
-		currentVal = containerVal;
-		while ((double)currentVal >= (double)containerVal - width / 2) {
-			pointsInStrip[midpoint--] = current.getData();
-			current = current.getPrev();
-			if(current == null)
-				break;
-			currentVal=current.getVal(axis);
-		}
-		current = container;
-		currentVal = containerVal;
-		midpoint = (int) (size / 2);
-		while ((double)currentVal <= (double)containerVal + width / 2) {
-			pointsInStrip[midpoint++] = current.getData();
-			current = current.getNext();
-			if(current == null)
-				break;
-			currentVal=current.getVal(axis);
-		}
-		return pointsInStrip;
+	@Override
+	public Point[] nearestPair() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	//TODO: add members, methods, etc.
+
+	/************** HELPERS ********************/
+
+	public ContainerList getxSorted() {
+		return this.xSorted;
+	}
+
+	public ContainerList getySorted() {
+		return this.ySorted;
+	}
+
+	public int getSize() {
+		return this.size;
 	}
 
 	public Point[] nearestPointInStripHelper(Container point, int min, int max, Boolean axis){
@@ -270,22 +200,147 @@ public class DataStructure implements DT {
 		return nearestPairOfPoint;
 	}
 
-	@Override
-	public Point[] nearestPair() {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Get a sorted array of all the points in a strip.
+	 * @param container the middle of the strip, by the given axis.
+	 * @param width the width of the strip.
+	 * @param axis the axis to sort by and to determine the size of the strip.
+	 * @return all the points in a strip.
+	 */
+	public Point[] pointsInStrip(Container container, double width, Boolean axis) {
+		// wasteful, should be organized as a containerList. rearranged with mergesort
+		Point[] points = new Point[size];
+		Container current = container;
+		int index = size / 2, containerVal = current.getVal(axis), currentVal = containerVal, count = 0;
+
+		// while the current value is not less than the minimum value
+		while ((double) currentVal >= (double) containerVal - width / 2) {
+			// put the point in the array, then proceed to check the prev. value
+			points[index--] = current.getData();
+			count++;
+			current = current.getPrev();
+
+			if(current == null)
+				break;
+
+			currentVal = current.getVal(axis);
+		}
+
+		// reset, now the other direction
+		current = container;
+		currentVal = containerVal;
+		index = size / 2;
+
+		while ((double) currentVal <= (double) containerVal + width / 2) {
+			points[index++] = current.getData();
+			current = current.getNext();
+			count++;
+
+			if(current == null)
+				break;
+
+			currentVal = current.getVal(axis);
+		}
+
+		// minus one, because we counter the middle twice
+		return deleteArrayTail(points, index - count + 1, count - 1);
 	}
 
-	//TODO: add members, methods, etc.
-	public ContainerList getxSorted() {
-		return this.xSorted;
+	/**
+	 * Cut a given array.
+	 * @param toDeleteFrom an array to extract elements from.
+	 * @param beginning the index of the first element to copy.
+	 * @param len the length of the relevant data.
+	 * @return a new array of the first len elements of toDeleteFrom.
+	 */
+	private Point[] deleteArrayTail(Point[] toDeleteFrom, int beginning, int len){
+		Point[] output = new Point[len];
+
+		if (len != this.size)
+			// create an array of the correct size and copy the points to it
+			for (int i = len; i != 0; i--)
+				output[i - 1] = toDeleteFrom[beginning + i - 1];
+		else
+			output = toDeleteFrom;
+
+		return output;
 	}
 
-	public ContainerList getySorted() {
-		return this.ySorted;
+	/**
+	 * Sort an array of points by a given axis using merge sort.
+	 * @param array the array to sort.
+	 * @param axis the axis to sort by.
+	 */
+	public void mergeSort(Point[] array, Boolean axis){
+		mergeSortSort(array, axis, 0, array.length - 1);
 	}
 
-	public int getSize() {
-		return this.size;
+	/**
+	 * The actual merge sort.
+	 * @param array an array to sort.
+	 * @param axis an axis to sort by.
+	 * @param left beginning of the section to sort.
+	 * @param right end of the section to sort.
+	 */
+	private void mergeSortSort(Point[] array, Boolean axis, int left, int right){
+		if (left < right){
+			mergeSortSort(array, axis, left, (right + left) / 2);
+			mergeSortSort(array, axis, (right + left) / 2 + 1, right);
+			mergeSortMerge(array, axis, left, right);
+		}
+	}
+
+	/**
+	 * The merging part of the merge sort - merge two halves of a section of the array.
+	 * @param array the array to sort.
+	 * @param axis the axis to sort by.
+	 * @param left beginning of the section to sort.
+	 * @param right end of the section to sort.
+	 */
+	private void mergeSortMerge(Point[] array, Boolean axis, int left, int right){
+		int middle = (right + left) / 2, leftHalfSize = middle - left + 1, rightHalfSize = right - middle;
+		int takenFromLeft = 0, takenFromRight = 0;
+		Point[] leftHalf = new Point[leftHalfSize], rightHalf = new Point[rightHalfSize];
+
+		// copy the points to two arrays, left and right
+
+		for (int i = 0; i < rightHalfSize; i++){
+			leftHalf[i] = array[left + i];
+			rightHalf[i] = array[middle + 1 + i];
+		}
+
+		// if one half is bigger, it is the left half )contains the middle)
+		if (leftHalfSize > rightHalfSize)
+			leftHalf[rightHalfSize] = array[middle];
+
+		// assuming left and right array are sorted!
+
+		// while not over with both halves
+		while (takenFromLeft < leftHalfSize && takenFromRight < rightHalfSize){
+			// check where is the next element, then put it in the right place
+
+			if (getPointVal(rightHalf[takenFromRight], axis) < getPointVal(leftHalf[takenFromLeft], axis))
+				array[left + takenFromLeft + takenFromRight] = rightHalf[takenFromRight++];
+			else
+				array[left + takenFromLeft + takenFromRight] = leftHalf[takenFromLeft++];
+		}
+
+		// add the remaining points from the half that we did not take all of its elements
+
+		while (takenFromLeft < leftHalfSize)
+			array[left + takenFromLeft + takenFromRight] = leftHalf[takenFromLeft++];
+
+		while (takenFromRight < rightHalfSize)
+			array[left + takenFromLeft + takenFromRight] = rightHalf[takenFromRight++];
+	}
+
+	/**
+	 * Get the relevant value of a point.
+	 * @param p the point.
+	 * @param axis the axis.
+	 * @return the axis value of p.
+	 */
+	private int getPointVal(Point p, Boolean axis){
+		return axis ? p.getX() : p.getY();
 	}
 }

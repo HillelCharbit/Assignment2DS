@@ -5,15 +5,18 @@ import java.util.Set;
 public class Test {
     public static void main(String[] args) {
         DataStructure dt = new DataStructure();
-        addPoints(dt, getTestPoints());
+//        addPoints(dt, getTestPoints());
+
+        addRandomTestPoints(dt, 0, 20, 20);
+
         System.out.println(dt.getxSorted());
         System.out.println(dt.getySorted());
         Container median = dt.getMedian(true);
         System.out.println(median);
-        Point[] points = dt.pointsInStrip(median,4,true);
-        for(Point p: points)
-            System.out.println(p);
-
+        Point[] points = dt.pointsInStrip(median,10,true);
+        printArray(points);
+        dt.mergeSort(points, false);
+        printArray(points);
     }
 
     public static Point[] getTestPoints(){
@@ -80,14 +83,4 @@ public class Test {
 
         System.out.println("}");
     }
-
-    /*
-    *
-    * def split(int value, Boolean axis):
-    *
-    *
-    * */
-
-
-
 }

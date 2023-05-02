@@ -20,9 +20,7 @@ public class ContainerList {
     }
 
     /**
-     * Add a point to the list.
-     * TODO: do not add an illegal point (but that mean's visiting all the points in the list.
-     * TODO: after completing the first TODO, add an option to use the function as it was.
+     * Add a point to the list, keeping the list sorted.
      * @param point a point to add to the list.
      * @return a new Container containing the point.
      */
@@ -193,7 +191,11 @@ public class ContainerList {
             this.tail.setNext(point);
             point.setPrev(this.tail);
             this.tail = point;
+
+            if (this.size % 2 == 1)
+                this.median = this.median.getNext();
         }
+
         this.size++;
     }
 
@@ -211,7 +213,11 @@ public class ContainerList {
             this.head.setPrev(point);
             point.setNext(this.head);
             this.head = point;
+
+            if (this.size % 2 == 0)
+                this.median = this.median.getPrev();
         }
+
         this.size++;
     }
 }
