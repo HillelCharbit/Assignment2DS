@@ -154,10 +154,44 @@ public class DataStructure implements DT {
 	@Override
 	public Point[] nearestPairInStrip(Container container, double width,
 									  Boolean axis) {
-		Point[] PointsInStrip = pointsInStrip(container,width,axis);
-		Point[] Pair = new Point[2];
+		Point[] strip = pointsInStrip(container, width, axis);
+		Point[] pair = new Point[2];
+		double minDist = Double.MAX_VALUE, currentDist;
 
-		return Pair;
+		// sort the points by the opposite axis
+		mergeSort(strip, !axis);
+
+		// for each point, calculate the distance to the next 5 points
+		// find the minimum
+		// TODO: explain why 5?
+
+		// fot the first n-5 points, check 5 points
+		for (int i = 0; i < strip.length - 5; i++)
+			for (int j = 1; j < 6; j++){
+				currentDist = distanceSquared(strip[i], strip[i + j]);
+//				System.out.println("D(" + strip[i] + ", " + strip[i + j] + ") = " + currentDist);
+
+				if (currentDist > minDist){
+					minDist = distanceSquared(strip[i], strip[i + j]);
+					pair[0] = strip[i];
+					pair[1] = strip[i + j];
+				}
+			}
+
+		// for the last 5 points check all the points after them
+		for (int i = strip.length - 5; i < strip.length; i++)
+			for (int j = strip.length - i - 1; j > 0; j--){
+				currentDist = distanceSquared(strip[i], strip[i + j]);
+//				System.out.println("D(" + strip[i] + ", " + strip[i + j] + ") = " + currentDist);
+
+				if (currentDist < minDist){
+					minDist = currentDist;
+					pair[0] = strip[i];
+					pair[1] = strip[i + j];
+				}
+			}
+
+		return pair;
 	}
 
 	@Override
@@ -342,5 +376,10 @@ public class DataStructure implements DT {
 	 */
 	private int getPointVal(Point p, Boolean axis){
 		return axis ? p.getX() : p.getY();
+	}
+
+	private double distanceSquared(Point p1, Point p2){
+		return ((p1.getX() - p2.getX()) * (p1.getX() - p2.getX()) +
+				(p1.getY() - p2.getY()) * (p1.getY() - p2.getY()));
 	}
 }

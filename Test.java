@@ -7,16 +7,17 @@ public class Test {
         DataStructure dt = new DataStructure();
 //        addPoints(dt, getTestPoints());
 
-        addRandomTestPoints(dt, 0, 20, 20);
+        addRandomTestPoints(dt, 0, 100, 50);
 
         System.out.println(dt.getxSorted());
         System.out.println(dt.getySorted());
         Container median = dt.getMedian(true);
         System.out.println(median);
-        Point[] points = dt.pointsInStrip(median,10,true);
+        Point[] points = dt.pointsInStrip(median,50,true);
         printArray(points);
         dt.mergeSort(points, false);
         printArray(points);
+        printArray(dt.nearestPairInStrip(median, 50, true));
     }
 
     public static Point[] getTestPoints(){
