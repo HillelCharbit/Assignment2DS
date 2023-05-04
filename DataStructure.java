@@ -210,57 +210,54 @@ public class DataStructure implements DT {
 			return nearestPair;
 
 		boolean axis = getLargestAxis();
-		Container median = this.getMedian(axis);
-
-		return nearestPairHelper(median,axis);
+		Container current = axis ? getxSorted().head : getySorted().head;
+		Point[] toArray = new Point[size];
+		for(int i = 0; current != null;i++){
+			toArray[i]=current.getData();
+			current = current.getNext();
+		}
+		return nearestPairHelper(toArray,axis);
 
 	}
 
-	public Point[] nearestPairHelper(Container median, boolean axis){
+	public Point[] nearestPairHelper(Point[] dt, boolean axis){
 		Point[] output1 = new Point[2];
 		Point[] output2 = new Point[2];
 		Point[] output3 = new Point[2];
 
-		ContainerList first = new ContainerList(axis);
-		ContainerList second = new ContainerList(axis);
+		Point[] first = new Point[size/2];
+		Point[] second = new Point[size/2];
 
-		Container current = median;
-
-		while(current != null){
-			first.addLast(current);
-			current = current.getNext();
+		for(int i = 0; i<first.length;i++){
+			first[i]=dt[i];
 		}
-		current = median;
-		while(current != null) {
-			second.addFirst(current);
-			current = current.getNext();
+		for(int i = size/2; i < size ;i++){
+			second[i]=dt[i];
 		}
-		if (first.getSize() < 2)
+		if (first.length < 2)
 			return output1;
 
-		if(first.getSize() == 2) {
-			output1[0] = first.head.getData();
-			output1[1] = first.tail.getData();
-			return output1;
+		if(first.length == 2) {
+			return first;
 		}
-		if(first.getSize() == 3) {
-			double d1 = distance(first.head.getData(), first.head.getNext().getData());
-			double d2 = distance(first.tail.getData(), first.head.getNext().getData());
-			double d3 = distance(first.head.getData(), first.tail.getData());
+		if(first.length == 3) {
+			double d1 = distance(first[0], first[1]);
+			double d2 = distance(first[1], first[2]);
+			double d3 = distance(first[2], first[0]);
 			double min = Math.min(Math.min(d1, d2), d3);
 
 			if (min == d1) {
-				output1[0] = first.head.getData();
-				output1[1] = first.head.getNext().getData();
+				output1[0] = first[0];
+				output1[1] = first[1];
 				return output1;
 			}
 			if (min == d2) {
-				output2[0] = first.head.getNext().getData();
-				output2[1] = first.tail.getData();
+				output2[0] = first[1];
+				output2[1] = first[2];
 				return output2;
 			}
-			output3[0] = first.head.getData();
-			output3[1] = first.tail.getData();
+			output3[0] = first[2];
+			output3[1] = first[0];
 			return output3;
 		}
 
