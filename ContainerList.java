@@ -1,8 +1,6 @@
-import java.util.Iterator;
-
 /**
  * A class that functions like a doubly linked list of Containers.
- * The points in the list are always sorted in an increasing order.
+ * The points in the list are sorted in an increasing order.
  */
 public class ContainerList {
     protected Container head;
@@ -93,6 +91,7 @@ public class ContainerList {
         return this.size == 0;
     }
 
+    /** @return the string "{(x1, y1), (x2, y2), ..., (xn, yn)}".*/
     public String toString() {
         String str = "{";
         Container current = head;
@@ -113,14 +112,14 @@ public class ContainerList {
         return this.size;
     }
 
-    /** @return the max. value of a point in the list (by the given axis). */
+    /** @return the max. value of a point in the list (by the associated axis) assuming it is sorted. */
     public int getMax() {
         if (this.axis)
             return this.tail.getX();
         return this.tail.getY();
     }
 
-    /** @return the min. value of a point in the list (by the given axis). */
+    /** @return the min. value of a point in the list (by the associated axis) assuming it is sorted. */
     public int getMin() {
         if (this.axis)
             return this.head.getX();
@@ -132,9 +131,6 @@ public class ContainerList {
      * @param toRemove the container to remove (A REFERENCE!)
      */
     public void remove(Container toRemove) {
-        if (this.isEmpty())
-            throw new IllegalArgumentException();
-
         int val, medVal;    // value of new node and the current median
 
         if (this.size == 1) {
@@ -177,10 +173,11 @@ public class ContainerList {
         return this.median;
     }
 
-    public void addLast(Point point){
-        this.addLast(new Container(point));
-    }
-
+    /**
+     * Add a point to the end of the list.
+     * Note: this function DOES NOT check if the point is greater than the tail!
+     * @param point a point to add.
+     */
     public void addLast(Container point){
         if (this.tail == null){
             this.tail = point;
@@ -199,10 +196,11 @@ public class ContainerList {
         this.size++;
     }
 
-    public void addFirst(Point point){
-        this.addFirst(new Container(point));
-    }
-
+    /**
+     * Add a point to the beginning of the list.
+     * Note: this function DOES NOT check if the point is smaller than the head!
+     * @param point a point to add.
+     */
     public void addFirst(Container point){
         if (this.head == null){
             this.head = point;
@@ -221,6 +219,7 @@ public class ContainerList {
         this.size++;
     }
 
+    /** @return an array of all the points in the list, by their order in the list. */
     public Point[] toArray(){
         Point[] arr = new Point[this.size];
         Container current = this.head;
@@ -233,6 +232,8 @@ public class ContainerList {
         return arr;
     }
 
+    /** @return an array of all the points in the list, stored in Containers with the actual pointers,
+     * by their order in the list. */
     public Container[] toArrayOfContainers(){
         Container[] arr = new Container[this.size];
         Container current = this.head;

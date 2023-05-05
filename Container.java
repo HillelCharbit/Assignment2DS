@@ -28,12 +28,6 @@ public class Container{
 		this(point, null, null);
 	}
 
-	/** Copy constructor. */
-	public Container(Container other){
-		this(other.data, other.prev, other.next);
-		this.inOtherList = other.inOtherList;
-	}
-
 	public Container getPrev() { return prev; }
 
 	public Container getNext() { return next; }
@@ -56,6 +50,11 @@ public class Container{
 	public int getX(){ return this.data.getX(); }
 	public int getY(){ return this.data.getY(); }
 
+	/**
+	 * Get the value of the point by a given axis.
+	 * @param axis true for X, false for Y.
+	 * @return the value by the given axis.
+	 */
 	public int getVal(boolean axis){
 		return axis ? getX() : getY();
 	}

@@ -6,9 +6,7 @@ public class Test {
     public static void main(String[] args) {
         DataStructure dt = new DataStructure();
         addPoints(dt, getTestPoints());
-        System.out.println(dt.getxSorted());
-        Point[] pair = dt.nearestPair();
-        printArray(pair);
+        printArray(dt.nearestPair());
     }
 
     public static Point[] getTestPoints(){
