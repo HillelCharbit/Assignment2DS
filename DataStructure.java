@@ -155,7 +155,57 @@ public class DataStructure implements DT {
 	@Override
 	public Point[] nearestPairInStrip(Container container, double width,
 									  Boolean axis) {
-		Point[] strip = pointsInStrip(container, width, axis);
+//		Point[] strip = pointsInStrip(container, width, axis);
+//		Point[] pair = new Point[2];
+//		double minDist = Double.MAX_VALUE, currentDist;
+//
+//		if(strip.length*Math.log(strip.length)<size)
+//			// sort the points by the opposite axis
+//			mergeSort(strip, !axis);
+//		else{
+//			int min = (int)(container.getVal(axis) - (width/2));
+//			int max = (int)(container.getVal(axis) + (width/2));
+//
+//			strip = getPointsInRangeOppAxis(min,max,axis);
+//		}
+//
+//		// for each point, calculate the distance to the next 5 points
+//		// find the minimum
+//		// TODO: explain why 5?
+//
+//		// fot the first n-5 points, check 5 points
+//		for (int i = 0; i < strip.length - 5; i++)
+//			for (int j = 1; j < 6; j++){
+//				currentDist = distance(strip[i], strip[i + j]);
+////				System.out.println("D(" + strip[i] + ", " + strip[i + j] + ") = " + currentDist);
+//
+//				if (currentDist > minDist){
+//					minDist = distance(strip[i], strip[i + j]);
+//					pair[0] = strip[i];
+//					pair[1] = strip[i + j];
+//				}
+//			}
+//
+//		// for the last 5 points check all the points after them
+//		for (int i = strip.length - 5; i < strip.length; i++)
+//			for (int j = strip.length - i - 1; j > 0; j--){
+//				currentDist = distance(strip[i], strip[i + j]);
+////				System.out.println("D(" + strip[i] + ", " + strip[i + j] + ") = " + currentDist);
+//
+//				if (currentDist < minDist){
+//					minDist = currentDist;
+//					pair[0] = strip[i];
+//					pair[1] = strip[i + j];
+//				}
+//			}
+//
+//		return pair;
+		return nearestPairInStripB(container, width, axis, Integer.MIN_VALUE, Integer.MAX_VALUE);
+	}
+
+	public Point[] nearestPairInStripB(Container container, double width,
+									  Boolean axis, int minVal, int maxVal) {
+		Point[] strip = pointsInStripB(container, width, axis, minVal, maxVal);
 		Point[] pair = new Point[2];
 		double minDist = Double.MAX_VALUE, currentDist;
 
@@ -163,8 +213,8 @@ public class DataStructure implements DT {
 			// sort the points by the opposite axis
 			mergeSort(strip, !axis);
 		else{
-			int min = (int)(container.getVal(axis) - (width/2));
-			int max = (int)(container.getVal(axis) + (width/2));
+			int min = Math.max((int)(container.getVal(axis) - (width/2)), minVal);
+			int max = Math.min((int)(container.getVal(axis) + (width/2)), maxVal);
 
 			strip = getPointsInRangeOppAxis(min,max,axis);
 		}
@@ -187,7 +237,7 @@ public class DataStructure implements DT {
 			}
 
 		// for the last 5 points check all the points after them
-		for (int i = strip.length - 5; i < strip.length; i++)
+		for (int i = strip.length - 5; i < strip.length && i >= 0; i++)
 			for (int j = strip.length - i - 1; j > 0; j--){
 				currentDist = distance(strip[i], strip[i + j]);
 //				System.out.println("D(" + strip[i] + ", " + strip[i + j] + ") = " + currentDist);
@@ -204,79 +254,192 @@ public class DataStructure implements DT {
 
 	@Override
 	public Point[] nearestPair() {
-		Point[] nearestPair = new Point[2];
+		Point[] pair = new Point[2];
 
-		if (size < 2)
-			return nearestPair;
+		if (this.size < 2)
+			return pair;
+
+		if (this.size == 2){
+			pair[0] = this.xSorted.head.getData();
+			pair[1] = this.xSorted.tail.getData();
+			return pair;
+		}
+
+		// there are at least 3 points in the segment
 
 		boolean axis = getLargestAxis();
-		Container current = axis ? getxSorted().head : getySorted().head;
-		Point[] toArray = new Point[size];
-		for(int i = 0; current != null;i++){
-			toArray[i]=current.getData();
-			current = current.getNext();
-		}
-		return nearestPairHelper(toArray,axis);
+//		Point[] allPoints = axis ? this.xSorted.toArray() : this.ySorted.toArray();
+		Container[] allPoints = axis ? this.xSorted.toArrayOfContainers() : this.ySorted.toArrayOfContainers();
 
+//		Container current = axis ? getxSorted().head : getySorted().head;
+//
+//		Point[] toArray = new Point[size];
+//		for(int i = 0; current != null;i++){
+//			toArray[i]=current.getData();
+//			current = current.getNext();
+//		}
+
+
+//		return nearestPairHelper(toArray,axis);
+		return nearestPair(allPoints, axis, 0, this.size - 1);
 	}
 
-	public Point[] nearestPairHelper(Point[] dt, boolean axis){
-		Point[] output1 = new Point[2];
-		Point[] output2 = new Point[2];
-		Point[] output3 = new Point[2];
+//	/**
+//	 * Calculate the nearest pair in a set of points.
+//	 * @param points the points to check.
+//	 * @param axis some axis X or Y.
+//	 * @param beginning the index of the first relevant point.
+//	 * @param end the index of the last relevant point.
+//	 * @return the nearest pair in [beginning, end].
+//	 */
+//	public Point[] nearestPair(Point[] points, Boolean axis, int beginning, int end){
+//		Point[] pair = new Point[2];
+//		Point[] firstHalfPair;
+//		Point[] secondHalfPair;
+//		Point[] stripPair;
+//
+//		int segmentSize = end - beginning + 1;
+//
+//		// note that when both even or both odd, the middle is the actual middle (same distance from both ends),
+//		// otherwise, eg. 2 and 9, the middle is 5, which is in the first half.
+//		int middle = (end + beginning) / 2;
+//
+//		double firstHalfMinDist, secondHalfMinDist, minDist;
+//
+//		if (segmentSize % 2 == 1)
+//			middle++;	// fix the middle
+//
+//		if (segmentSize < 2)
+//			return pair;
+//
+//		if (segmentSize == 2){
+//			pair[0] = points[beginning];
+//			pair[1] = points[end];
+//			return pair;
+//		}
+//
+//		// there are at least 3 points in the segment
+//
+//		firstHalfPair = nearestPair(points, axis, beginning, middle - 1);
+//		secondHalfPair = nearestPair(points, axis, middle + 1, end);
+//
+//		firstHalfMinDist = distance(firstHalfPair[0], firstHalfPair[1]);
+//		secondHalfMinDist = distance(secondHalfPair[0], secondHalfPair[1]);
+//		minDist = Math.min(firstHalfMinDist, secondHalfMinDist);
+//
+////		stripPair = nearestPairInStrip()
+//	}
 
-		Point[] first = new Point[size/2];
-		Point[] second = new Point[size/2];
+	/**
+	 * Calculate the nearest pair in a set of points.
+	 * @param points the points to check.
+	 * @param axis some axis X or Y.
+	 * @param beginning the index of the first relevant point.
+	 * @param end the index of the last relevant point.
+	 * @return the nearest pair in [beginning, end].
+	 */
+	public Point[] nearestPair(Container[] points, Boolean axis, int beginning, int end){
+		Point[] pair = new Point[2];
+		Point[] firstHalfPair;
+		Point[] secondHalfPair;
+		Point[] stripPair;
 
-		for(int i = 0; i<first.length;i++){
-			first[i]=dt[i];
+		int segmentSize = end - beginning + 1;
+
+		// note that when both even or both odd, the middle is the actual middle (same distance from both ends),
+		// otherwise, eg. 2 and 9, the middle is 5, which is in the first half.
+		int middle = (int)(Math.ceil((double) (end + beginning) / 2));
+
+		double firstHalfMinDist, secondHalfMinDist, minDist;
+
+//		if (segmentSize % 2 == 1)
+//			middle++;	// fix the middle
+
+		if (segmentSize < 2)
+			return pair;
+
+		if (segmentSize == 2){
+			pair[0] = points[beginning].getData();
+			pair[1] = points[end].getData();
+			return pair;
 		}
-		for(int i = size/2; i < size ;i++){
-			second[i]=dt[i];
-		}
-		if (first.length < 2)
-			return output1;
 
-		if(first.length == 2) {
-			return first;
-		}
-		if(first.length == 3) {
-			double d1 = distance(first[0], first[1]);
-			double d2 = distance(first[1], first[2]);
-			double d3 = distance(first[2], first[0]);
-			double min = Math.min(Math.min(d1, d2), d3);
+		// there are at least 3 points in the segment
 
-			if (min == d1) {
-				output1[0] = first[0];
-				output1[1] = first[1];
-				return output1;
-			}
-			if (min == d2) {
-				output2[0] = first[1];
-				output2[1] = first[2];
-				return output2;
-			}
-			output3[0] = first[2];
-			output3[1] = first[0];
-			return output3;
-		}
+		firstHalfPair = nearestPair(points, axis, beginning, middle - 1);
+		secondHalfPair = nearestPair(points, axis, middle + 1, end);
 
-		output1 = nearestPairHelper(first.getMedian(),axis);
-		output2 = nearestPairHelper(second.getMedian(),axis);
+		firstHalfMinDist = distance(firstHalfPair[0], firstHalfPair[1]);
+		secondHalfMinDist = distance(secondHalfPair[0], secondHalfPair[1]);
+		minDist = Math.min(firstHalfMinDist, secondHalfMinDist);
 
-		double d1 = distance(output1[0],output1[1]);
-		double d2 = distance(output2[0],output2[1]);
-		double minDif = Math.min(d1,d2);
+		stripPair = nearestPairInStripB(points[middle], 2 * minDist, axis,
+				points[beginning].getVal(axis), points[end].getVal(axis));
 
-		if (minDif == d2)
-			output1 = output2;
-
-		output3 = nearestPairInStrip(median,2*minDif,axis);
-
-		double d3 = distance(output3[0],output3[1]);
-
-		return d3<minDif ? output3 : output1;
+		if (distance(stripPair[0], stripPair[1]) < minDist)
+			return stripPair;
+		else if (minDist == firstHalfMinDist)
+			return firstHalfPair;
+		else return secondHalfPair;
 	}
+
+//	public Point[] nearestPairHelper(Point[] dt, boolean axis){
+//		Point[] output1 = new Point[2];
+//		Point[] output2 = new Point[2];
+//		Point[] output3 = new Point[2];
+//
+//		Point[] first = new Point[size/2];
+//		Point[] second = new Point[size/2];
+//
+//		for(int i = 0; i<first.length;i++){
+//			first[i]=dt[i];
+//		}
+//		for(int i = size/2; i < size ;i++){
+//			second[i]=dt[i];
+//		}
+//		if (first.length < 2)
+//			return output1;
+//
+//		if(first.length == 2) {
+//			return first;
+//		}
+//		if(first.length == 3) {
+//			double d1 = distance(first[0], first[1]);
+//			double d2 = distance(first[1], first[2]);
+//			double d3 = distance(first[2], first[0]);
+//			double min = Math.min(Math.min(d1, d2), d3);
+//
+//			if (min == d1) {
+//				output1[0] = first[0];
+//				output1[1] = first[1];
+//				return output1;
+//			}
+//			if (min == d2) {
+//				output2[0] = first[1];
+//				output2[1] = first[2];
+//				return output2;
+//			}
+//			output3[0] = first[2];
+//			output3[1] = first[0];
+//			return output3;
+//		}
+//
+//		output1 = nearestPairHelper(first.getMedian(),axis);
+//		output2 = nearestPairHelper(second.getMedian(),axis);
+//
+//		double d1 = distance(output1[0],output1[1]);
+//		double d2 = distance(output2[0],output2[1]);
+//		double minDif = Math.min(d1,d2);
+//
+//		if (minDif == d2)
+//			output1 = output2;
+//
+//		output3 = nearestPairInStrip(median,2*minDif,axis);
+//
+//		double d3 = distance(output3[0],output3[1]);
+//
+//		return d3<minDif ? output3 : output1;
+//	}
 
 	//TODO: add members, methods, etc.
 
@@ -301,7 +464,7 @@ public class DataStructure implements DT {
 	 * @param axis the axis to sort by and to determine the size of the strip.
 	 * @return all the points in a strip.
 	 */
-	public Point[] pointsInStrip(Container container, double width, Boolean axis) {
+	public Point[] pointsInStripOld(Container container, double width, Boolean axis) {
 		// wasteful, should be organized as a containerList. rearranged with mergesort
 		Point[] points = new Point[size];
 		Container current = container;
@@ -337,6 +500,95 @@ public class DataStructure implements DT {
 		}
 		// minus one, because we counter the middle twice
 		return deleteArrayTail(points, index - count + 1, count - 1);
+	}
+
+	/**
+	 * Get a sorted array of all the points in a strip.
+	 * @param container the middle of the strip, by the given axis.
+	 * @param width the width of the strip.
+	 * @param axis the axis to sort by and to determine the size of the strip.
+	 * @return all the points in a strip.
+	 */
+	public Point[] pointsInStrip(Container container, double width, Boolean axis) {
+//		// wasteful, should be organized as a containerList. rearranged with mergesort
+//		ContainerList strip = new ContainerList(axis);
+//		Container current = container;
+//		int containerVal = current.getVal(axis), currentVal = containerVal, count = 0;
+//
+//		// while the current value is not less than the minimum value
+//		while ((double) currentVal >= (double) containerVal - width / 2) {
+//			// put the point in the array, then proceed to check the prev. value
+//			strip.addFirst(current);
+//			count++;
+//			current = current.getPrev();
+//
+//			if(current == null)
+//				break;
+//
+//			currentVal = current.getVal(axis);
+//		}
+//
+//		// reset, now the other direction
+//		current = container.getNext();
+//		currentVal = containerVal;
+//
+//		while ((double) currentVal <= (double) containerVal + width / 2) {
+//			strip.addLast(current);
+//			current = current.getNext();
+//			count++;
+//
+//			if(current == null)
+//				break;
+//
+//			currentVal = current.getVal(axis);
+//		}
+//
+//		return strip.toArray();
+		return pointsInStripB(container, width, axis, Integer.MIN_VALUE, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Get a sorted array of all the points in a strip.
+	 * @param container the middle of the strip, by the given axis.
+	 * @param width the width of the strip.
+	 * @param axis the axis to sort by and to determine the size of the strip.
+	 * @return all the points in a strip.
+	 */
+	public Point[] pointsInStripB(Container container, double width, Boolean axis, int minVal, int maxVal) {
+		// wasteful, should be organized as a containerList. rearranged with mergesort
+		ContainerList strip = new ContainerList(axis);
+		Container current = container;
+		int containerVal = current.getVal(axis), currentVal = containerVal;
+		int min = Math.max((int)(containerVal - width / 2), minVal);
+		int max = Math.min((int)(containerVal + width / 2), maxVal);
+
+		// while the current value is not less than the minimum value
+		while ((double) currentVal >= min) {
+			// put the point in the array, then proceed to check the prev. value
+			strip.addFirst(current);
+			current = current.getPrev();
+
+			if(current == null)
+				break;
+
+			currentVal = current.getVal(axis);
+		}
+
+		// reset, now the other direction
+		current = container.getNext();
+		currentVal = containerVal;
+
+		while ((double) currentVal <= max) {
+			strip.addLast(current);
+			current = current.getNext();
+
+			if(current == null)
+				break;
+
+			currentVal = current.getVal(axis);
+		}
+
+		return strip.toArray();
 	}
 
 	/**
@@ -438,8 +690,12 @@ public class DataStructure implements DT {
 	}
 
 	private double distance(Point p1, Point p2){
+		if (p1 == null || p2 == null)
+			return Double.MAX_VALUE;
+
 		double dx = p1.getX() - p2.getX();
 		double dy = p1.getY() - p2.getY();
+
 		return Math.sqrt(dx*dx+dy*dy);
 	}
 }

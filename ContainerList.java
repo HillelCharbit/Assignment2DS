@@ -220,4 +220,28 @@ public class ContainerList {
 
         this.size++;
     }
+
+    public Point[] toArray(){
+        Point[] arr = new Point[this.size];
+        Container current = this.head;
+
+        for(int i = 0; i < this.size; i++){
+            arr[i] = current.getData();
+            current = current.getNext();
+        }
+
+        return arr;
+    }
+
+    public Container[] toArrayOfContainers(){
+        Container[] arr = new Container[this.size];
+        Container current = this.head;
+
+        for(int i = 0; i < this.size; i++){
+            arr[i] = current;
+            current = current.getNext();
+        }
+
+        return arr;
+    }
 }

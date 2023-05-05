@@ -6,20 +6,9 @@ public class Test {
     public static void main(String[] args) {
         DataStructure dt = new DataStructure();
         addPoints(dt, getTestPoints());
-
-//        addRandomTestPoints(dt, 0, 100, 50);
-
         System.out.println(dt.getxSorted());
-        System.out.println(dt.getySorted());
-        Container median = dt.getMedian(true);
-        System.out.println(median);
-//        Point[] points = dt.pointsInStrip(median,50,true);
-//        printArray(points);
-//        dt.mergeSort(points, false);
-//        printArray(points);
-//        printArray(dt.nearestPairInStrip(median, 50, true));
-        Point[] nearestPair = dt.nearestPair();
-        System.out.println(nearestPair[0].toString()+" "+nearestPair[1].toString());
+        Point[] pair = dt.nearestPair();
+        printArray(pair);
     }
 
     public static Point[] getTestPoints(){
